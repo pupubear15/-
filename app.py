@@ -1,11 +1,10 @@
-
 import streamlit as st
 import random
 
 # 設定頁面資訊
 st.set_page_config(page_title="日文學習小助手", page_icon="🇯🇵")
 
-# 準備一些基礎單字資料 (你之後可以擴充這個清單)
+# 準備單字資料
 word_dict = [
     {"kanji": "猫", "kana": "ねこ", "romaji": "neko", "english": "貓"},
     {"kanji": "美味しい", "kana": "おいしい", "romaji": "oishii", "english": "好吃"},
@@ -14,47 +13,43 @@ word_dict = [
     {"kanji": "朝ご飯", "kana": "あさごはん", "romaji": "asagohan", "english": "早餐"},
 ]
 
-# 初始化 Session State (確保重新整理時單字不會亂跳)
+# 初始化 Session State
 if 'current_word' not in st.session_state:
     st.session_state.current_word = random.choice(word_dict)
 if 'score' not in st.session_state:
     st.session_state.score = 0
 
+# 修正後的換題函式：移除對 st.session_state.user_answer 的直接賦值
 def next_word():
     st.session_state.current_word = random.choice(word_dict)
-    st.session_state.user_answer = ""
 
 # 介面設計
 st.title("🇯🇵 日文單字挑戰賽")
-st.write("請輸入對應的平假名或中文意思！")
 
 # 顯示題目
 word = st.session_state.current_word
 st.subheader(f"題目： {word['kanji']}")
 
-# 使用者輸入
-user_input = st.text_input("輸入答案 (平假名或中文):", key="user_answer")
+# 使用 Form 來處理輸入，這可以讓介面更穩定
+with st.form(key='my_form', clear_on_submit=True):
+    user_input = st.text_input("輸入對應的「平假名」或「中文」:")
+    submit_button = st.form_submit_button(label='提交答案')
 
-# 按鈕區
-col1, col2 = st.columns(2)
+if submit_button:
+    if user_input == word['kana'] or user_input == word['english']:
+        st.success(f"🎉 正確！答案就是「{word['kana']}」")
+        st.session_state.score += 1
+    else:
+        st.error(f"差一點點！正確答案是：{word['kana']} ({word['english']})")
 
-with col1:
-    if st.button("提交答案"):
-        if user_input == word['kana'] or user_input == word['english']:
-            st.success("🎉 正確！太棒了！")
-            st.session_state.score += 1
-        else:
-            st.error(f"差一點點！正確答案是：{word['kana']} ({word['english']})")
+# 下一題按鈕（獨立於 Form 之外）
+if st.button("下一題 ➡️"):
+    next_word()
+    st.rerun()
 
-with col2:
-    if st.button("下一題"):
-        next_word()
-        st.rerun()
-
-# 額外功能：顯示目前的得分
+# 側邊欄與提示
 st.sidebar.metric("目前得分", st.session_state.score)
 
-# 提示：如何唸這個字
 with st.expander("💡 偷看提示"):
     st.write(f"羅馬拼音：{word['romaji']}")
     st.write(f"中文：{word['english']}")
