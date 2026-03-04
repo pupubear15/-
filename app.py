@@ -1,76 +1,20 @@
 import streamlit as st
 import random
+import streamlit.components.v1 as components
 
-# 1. 頁面基本設定
-st.set_page_config(page_title="日文單字練習", page_icon="🇯🇵")
+# 1. 頁面設定
+st.set_page_config(page_title="N2 日文口說挑戰", page_icon="🎓", layout="wide")
 
-# 2. 題庫資料 (確保格式正確)
+# 2. 核心題庫：區分 N2 考點與生活對話
 word_library = {
-    "基礎名詞": [
-        {"kanji": "猫", "kana": "ねこ", "romaji": "neko", "english": "貓"},
-        {"kanji": "犬", "kana": "いぬ", "romaji": "inu", "english": "狗"},
-        {"kanji": "時計", "kana": "とけい", "romaji": "tokei", "english": "手錶"},
-        {"kanji": "先生", "kana": "せんせい", "romaji": "sensei", "english": "老師"}
+    "JLPT N2 高頻單字": [
+        {"kanji": "深刻", "kana": "しんこく", "romaji": "shinkoku", "english": "嚴重的/深刻的", "desc": "問題が深刻化する (問題變得嚴重)"},
+        {"kanji": "範囲", "kana": "はんい", "romaji": "han'i", "english": "範圍", "desc": "試験の範囲を確認する (確認考試範圍)"},
+        {"kanji": "慎重", "kana": "しんちょう", "romaji": "shinchou", "english": "慎重的", "desc": "慎重に検討する (慎重考慮)"},
+        {"kanji": "契機", "kana": "けいき", "romaji": "keiki", "english": "契機/轉機", "desc": "これを契機に改善する (以此為契機進行改善)"},
+        {"kanji": "普及", "kana": "ふきゅう", "romaji": "fukyuu", "english": "普及", "desc": "スマホが急速に普及した (手機迅速普及)"}
     ],
-    "基礎動詞": [
-        {"kanji": "食べる", "kana": "たべる", "romaji": "taberu", "english": "吃"},
-        {"kanji": "飲む", "kana": "のむ", "romaji": "nomu", "english": "喝"},
-        {"kanji": "寝る", "kana": "ねる", "romaji": "neru", "english": "睡覺"},
-        {"kanji": "勉強", "kana": "べんきょう", "romaji": "benkyou", "english": "學習"}
-    ]
-}
-
-# 3. 初始化狀態 (Session State)
-if 'score' not in st.session_state:
-    st.session_state.score = 0
-
-# 側邊欄選擇分類
-category = st.sidebar.selectbox("選擇題庫", list(word_library.keys()))
-current_pool = word_library[category]
-
-# 檢查是否需要更換題目
-if 'current_word' not in st.session_state or st.session_state.get('last_cat') != category:
-    st.session_state.current_word = random.choice(current_pool)
-    st.session_state.last_cat = category
-    st.session_state.feedback = None
-
-# 4. 主介面顯示
-st.title("🇯🇵 日文單字練習")
-word = st.session_state.current_word
-
-st.subheader(f"題目： {word['kanji']}")
-
-# 5. 輸入區域 (使用 Form)
-with st.form(key='my_form', clear_on_submit=True):
-    user_input = st.text_input("輸入平假名或中文：")
-    submit = st.form_submit_button("送出答案")
-
-if submit:
-    ans = user_input.strip()
-    if ans == word['kana'] or ans == word['english']:
-        st.session_state.feedback = f"✅ 正確！答案是：{word['kana']} ({word['english']})"
-        st.session_state.score += 1
-    else:
-        st.session_state.feedback = f"❌ 錯誤！正確答案是：{word['kana']} ({word['english']})"
-
-# 顯示回饋訊息
-if st.session_state.feedback:
-    st.info(st.session_state.feedback)
-
-# 6. 功能按鈕
-col1, col2 = st.columns(2)
-with col1:
-    if st.button("下一題 ➡️"):
-        st.session_state.current_word = random.choice(current_pool)
-        st.session_state.feedback = None
-        st.rerun()
-with col2:
-    if st.button("重設分數 🔄"):
-        st.session_state.score = 0
-        st.rerun()
-
-# 側邊欄狀態
-st.sidebar.divider()
-st.sidebar.write(f"目前分數：{st.session_state.score}")
-with st.sidebar.expander("💡 提示"):
-    st.write(f"拼音：{word['romaji']}")
+    "生活情境對話": [
+        {"kanji": "お会計お願いします", "kana": "おかいけいおねがいします", "romaji": "o kaikei onegaishimasu", "english": "麻煩買單", "desc": "餐廳結帳常用語"},
+        {"kanji": "お口に合いますか", "kana": "おくちにあいますか", "romaji": "o kuchi ni aimasu ka", "english": "合胃口嗎？", "desc": "招待客人吃飯時的客套話"},
+        {"kanji": "ちょっとよろしいですか", "kana": "ちょっとよろしいですか", "romaji": "chotto yoroshi
